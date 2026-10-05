@@ -48,12 +48,91 @@
   <!-- 메인 뷰 컨테이너 (SPA 뷰 전환) -->
   <main class="main-container" id="mainContainer">
     
-    <!-- 1. [학생 선택 화면] (로그인 대체 바둑판 뷰) -->
-    <section id="viewStudentPicker" class="view-section active">
+    <!-- 0. [학생 로그인 화면] (번호 + 이름 입력 접속) -->
+    <section id="viewStudentLogin" class="view-section active">
+      <div class="login-wrapper">
+        <div class="login-card">
+          <div class="login-mascot-area">
+            <span class="login-sprout-emoji bounce">🌱</span>
+            <div class="login-class-badge">2학년 1반</div>
+          </div>
+          
+          <h1 class="login-title">우리 반 쑥쑥 성장 일기</h1>
+          <p class="login-subtitle">
+            내 <strong>출석 번호</strong>와 <strong>이름</strong>을 입력하고<br>
+            나만의 귀여운 성장 캐릭터를 만나보세요! ✨
+          </p>
+
+          <form id="studentLoginForm" class="student-login-form" autocomplete="off" onsubmit="return false;">
+            <div class="login-field">
+              <label for="loginStudentNumber" class="login-label">
+                <span class="label-icon">🔢</span>
+                <span>출석 번호</span>
+              </label>
+              <div class="input-number-wrap">
+                <input 
+                  type="number" 
+                  id="loginStudentNumber" 
+                  class="login-input" 
+                  placeholder="예: 1 또는 41" 
+                  min="1" 
+                  max="99" 
+                  required
+                >
+                <span class="input-suffix">번</span>
+              </div>
+            </div>
+
+            <div class="login-field">
+              <label for="loginStudentName" class="login-label">
+                <span class="label-icon">✏️</span>
+                <span>이름</span>
+              </label>
+              <input 
+                type="text" 
+                id="loginStudentName" 
+                class="login-input" 
+                placeholder="예: 김이안" 
+                required
+              >
+            </div>
+
+            <!-- 에러 알림창 -->
+            <div id="loginAlertBox" class="login-alert-box hidden">
+              <span class="alert-icon">💡</span>
+              <span id="loginAlertText">번호와 이름을 다시 확인해 볼까요? (예: 1번 김이안)</span>
+            </div>
+
+            <button type="submit" id="studentLoginBtn" class="login-btn-primary">
+              <span class="btn-icon">🎒</span>
+              <span>우리 반 들어가기</span>
+            </button>
+          </form>
+
+          <div class="login-helper-links">
+            <button type="button" id="openRosterModalBtn" class="helper-link-btn">
+              <span>📋</span>
+              <span>우리 반 명렬표(출석부) 확인하기</span>
+            </button>
+            <button type="button" id="viewAllCardsBtn" class="helper-link-btn secondary">
+              <span>👀</span>
+              <span>전체 친구들 카드 보기</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. [학생 명렬표 바둑판 뷰] -->
+    <section id="viewStudentPicker" class="view-section hidden">
       <div class="section-banner">
+        <button id="backToLoginFromPickerBtn" class="back-pill-btn banner-back-btn">
+          <span>👈</span>
+          <span>로그인으로 돌아가기</span>
+        </button>
         <div class="banner-content">
-          <h1 class="welcome-heading">반가워요! 내 이름을 콕! 눌러보세요 ✨</h1>
-          <p class="welcome-desc">오늘도 칭찬 도장을 모아서 내 나무를 무럭무럭 키워볼까요?</p>
+          <h1 class="welcome-heading">우리 반 친구들 모아보기 ✨</h1>
+          <p class="welcome-desc">카드를 누르면 해당 학생 정보로 바로 로그인할 수 있어요!</p>
         </div>
         <div class="class-summary-pill">
           <span>우리 반 친구들</span>
@@ -61,276 +140,16 @@
         </div>
       </div>
 
-      <!-- 20명 학생 바둑판 그리드 -->
-      <div class="students-grid" id="studentsGrid">
-        <!-- 1번 김민준 -->
-        <div class="student-card" data-id="student-1">
-          <span class="student-card-num">1</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌳</span></div>
-          <h3 class="student-name-text">김민준</h3>
-          <span class="student-stage-pill stage-3">큰 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>32</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>17</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="칠판 지우개 요정"><span>🧹</span><span>칠판 지우개 요정</span></div>
-        </div>
-
-        <!-- 2번 이서아 -->
-        <div class="student-card" data-id="student-2">
-          <span class="student-card-num">2</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">이서아</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>15</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>15</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="줄 서기 반장"><span>🚶</span><span>줄 서기 반장</span></div>
-        </div>
-
-        <!-- 3번 박도윤 -->
-        <div class="student-card" data-id="student-3">
-          <span class="student-card-num">3</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌱</span></div>
-          <h3 class="student-name-text">박도윤</h3>
-          <span class="student-stage-pill stage-1">꼬마 새싹</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>8</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>8</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="시원한 우유 도우미"><span>🥛</span><span>시원한 우유 도우미</span></div>
-        </div>
-
-        <!-- 4번 최지우 -->
-        <div class="student-card" data-id="student-4">
-          <span class="student-card-num">4</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌳</span></div>
-          <h3 class="student-name-text">최지우</h3>
-          <span class="student-stage-pill stage-3">큰 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>45</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>22</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="학급 문고 정리왕"><span>📚</span><span>학급 문고 정리왕</span></div>
-        </div>
-
-        <!-- 5번 정하은 -->
-        <div class="student-card" data-id="student-5">
-          <span class="student-card-num">5</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🍎✨</span></div>
-          <h3 class="student-name-text">정하은</h3>
-          <span class="student-stage-pill stage-4">열매 맺은 황금 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>64</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>35</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="전등 불 끄기 지킴이"><span>💡</span><span>전등 불 끄기 지킴이</span></div>
-        </div>
-
-        <!-- 6번 강예준 -->
-        <div class="student-card" data-id="student-6">
-          <span class="student-card-num">6</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">강예준</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>12</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>7</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="초록 화분 돌보미"><span>🪴</span><span>초록 화분 돌보미</span></div>
-        </div>
-
-        <!-- 7번 조은우 -->
-        <div class="student-card" data-id="student-7">
-          <span class="student-card-num">7</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">조은우</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>28</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>18</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="맑은 공기 환기 대장"><span>🪟</span><span>맑은 공기 환기 대장</span></div>
-        </div>
-
-        <!-- 8번 윤수아 -->
-        <div class="student-card" data-id="student-8">
-          <span class="student-card-num">8</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌱</span></div>
-          <h3 class="student-name-text">윤수아</h3>
-          <span class="student-stage-pill stage-1">꼬마 새싹</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>5</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>5</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="연필깎이 깔끔 대장"><span>✏️</span><span>연필깎이 깔끔 대장</span></div>
-        </div>
-
-        <!-- 9번 장시우 -->
-        <div class="student-card" data-id="student-9">
-          <span class="student-card-num">9</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">장시우</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>19</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>14</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="분리수거 보안관"><span>🗑️</span><span>분리수거 보안관</span></div>
-        </div>
-
-        <!-- 10번 임지아 -->
-        <div class="student-card" data-id="student-10">
-          <span class="student-card-num">10</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌳</span></div>
-          <h3 class="student-name-text">임지아</h3>
-          <span class="student-stage-pill stage-3">큰 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>35</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>20</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="수업 시간 알리미"><span>🔔</span><span>수업 시간 알리미</span></div>
-        </div>
-
-        <!-- 11번 한우진 -->
-        <div class="student-card" data-id="student-11">
-          <span class="student-card-num">11</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌱</span></div>
-          <h3 class="student-name-text">한우진</h3>
-          <span class="student-stage-pill stage-1">꼬마 새싹</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>9</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>9</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="뽀득 손 씻기 도우미"><span>🧼</span><span>뽀득 손 씻기 도우미</span></div>
-        </div>
-
-        <!-- 12번 오유나 -->
-        <div class="student-card" data-id="student-12">
-          <span class="student-card-num">12</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌳</span></div>
-          <h3 class="student-name-text">오유나</h3>
-          <span class="student-stage-pill stage-3">큰 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>58</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>28</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="다정한 칭찬 요정"><span>🌈</span><span>다정한 칭찬 요정</span></div>
-        </div>
-
-        <!-- 13번 신서진 -->
-        <div class="student-card" data-id="student-13">
-          <span class="student-card-num">13</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">신서진</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>14</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>9</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="칠판 지우개 요정"><span>🧹</span><span>칠판 지우개 요정</span></div>
-        </div>
-
-        <!-- 14번 권채원 -->
-        <div class="student-card" data-id="student-14">
-          <span class="student-card-num">14</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌱</span></div>
-          <h3 class="student-name-text">권채원</h3>
-          <span class="student-stage-pill stage-1">꼬마 새싹</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>3</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>3</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="줄 서기 반장"><span>🚶</span><span>줄 서기 반장</span></div>
-        </div>
-
-        <!-- 15번 황민서 -->
-        <div class="student-card" data-id="student-15">
-          <span class="student-card-num">15</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">황민서</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>22</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>16</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="시원한 우유 도우미"><span>🥛</span><span>시원한 우유 도우미</span></div>
-        </div>
-
-        <!-- 16번 안태윤 -->
-        <div class="student-card" data-id="student-16">
-          <span class="student-card-num">16</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌳</span></div>
-          <h3 class="student-name-text">안태윤</h3>
-          <span class="student-stage-pill stage-3">큰 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>38</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>25</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="학급 문고 정리왕"><span>📚</span><span>학급 문고 정리왕</span></div>
-        </div>
-
-        <!-- 17번 송서연 -->
-        <div class="student-card" data-id="student-17">
-          <span class="student-card-num">17</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🍎✨</span></div>
-          <h3 class="student-name-text">송서연</h3>
-          <span class="student-stage-pill stage-4">열매 맺은 황금 나무</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>61</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>40</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="전등 불 끄기 지킴이"><span>💡</span><span>전등 불 끄기 지킴이</span></div>
-        </div>
-
-        <!-- 18번 전준우 -->
-        <div class="student-card" data-id="student-18">
-          <span class="student-card-num">18</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌱</span></div>
-          <h3 class="student-name-text">전준우</h3>
-          <span class="student-stage-pill stage-1">꼬마 새싹</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>7</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>7</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="초록 화분 돌보미"><span>🪴</span><span>초록 화분 돌보미</span></div>
-        </div>
-
-        <!-- 19번 홍다은 -->
-        <div class="student-card" data-id="student-19">
-          <span class="student-card-num">19</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">홍다은</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>18</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>12</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="맑은 공기 환기 대장"><span>🪟</span><span>맑은 공기 환기 대장</span></div>
-        </div>
-
-        <!-- 20번 백서율 -->
-        <div class="student-card" data-id="student-20">
-          <span class="student-card-num">20</span>
-          <div class="student-avatar-wrap"><span class="avatar-stage-icon">🌿</span></div>
-          <h3 class="student-name-text">백서율</h3>
-          <span class="student-stage-pill stage-2">작은 묘목</span>
-          <div class="student-stats-row">
-            <div class="stat-chip" title="누적 칭찬 도장"><span>💮</span><strong>29</strong>개</div>
-            <div class="stat-chip" title="보유 코인"><span>🪙</span><strong>19</strong>개</div>
-          </div>
-          <div class="student-role-tag" title="연필깎이 깔끔 대장"><span>✏️</span><span>연필깎이 깔끔 대장</span></div>
-        </div>
-      </div>
+      <!-- 20명 학생 바둑판 그리드 (app.js에서 20명 최신 명렬표로 자동 렌더링) -->
+      <div class="students-grid" id="studentsGrid"></div>
     </section>
 
     <!-- 2. [학생 메인 화면] -->
     <section id="viewStudentDashboard" class="view-section hidden">
       <div class="student-top-nav">
-        <button id="backToPickerBtn" class="back-pill-btn">
-          <span>👈</span>
-          <span>친구 목록으로</span>
+        <button id="backToPickerBtn" class="back-pill-btn" title="로그아웃 및 학생 변경">
+          <span>🚪</span>
+          <span>학생 변경 (로그아웃)</span>
         </button>
         <div class="student-profile-summary" id="dashProfileSummary">
           <!-- 번호, 이름 렌더링 -->
@@ -697,6 +516,27 @@
       <div class="modal-footer">
         <button id="cancelAddCouponBtn" class="modal-btn btn-secondary">닫기</button>
         <button id="confirmAddCouponBtn" class="modal-btn btn-primary">쿠폰 등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 우리 반 명렬표(출석부) 확인 모달 -->
+  <div class="modal-backdrop hidden" id="rosterModal">
+    <div class="modal-box roster-modal-box">
+      <div class="modal-header">
+        <span class="modal-icon-badge">📋</span>
+        <div>
+          <h3>우리 반 친구들 명렬표 (총 20명)</h3>
+          <p class="roster-modal-sub">내 이름을 콕 누르면 로그인 창에 자동으로 입력돼요!</p>
+        </div>
+      </div>
+      <div class="modal-body roster-modal-body">
+        <div class="roster-quick-grid" id="rosterQuickGrid">
+          <!-- app.js에서 1~10번, 41~50번 20명 버튼 카드 렌더링 -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeRosterModalBtn" class="modal-btn btn-secondary">닫기</button>
       </div>
     </div>
   </div>

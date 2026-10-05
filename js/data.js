@@ -3,7 +3,7 @@
  * 기본 데이터 정의 및 로컬 스토리지 관리 모듈
  */
 
-const STORAGE_KEY = 'SSOOK_CLASS_DATA_V1';
+const STORAGE_KEY = 'SSOOK_CLASS_DATA_V2';
 
 // 1. 성장 단계 기준 정의 (단일 성장 시스템: 누적 칭찬 도장 개수 기반)
 const GROWTH_STAGES = [
@@ -129,54 +129,43 @@ const DEFAULT_COUPONS = [
   }
 ];
 
-// 4. 20명 학생 초기 데이터 생성
+// 4. 20명 학생 초기 데이터 생성 (새 명렬표 반영 & 점수 0 초기화)
 function generateDefaultStudents() {
-  const studentNames = [
-    '김민준', '이서아', '박도윤', '최지우', '정하은',
-    '강예준', '조은우', '윤수아', '장시우', '임지아',
-    '한우진', '오유나', '신서진', '권채원', '황민서',
-    '안태윤', '송서연', '전준우', '홍다은', '백서율'
+  const studentList = [
+    { number: 1, name: '김이안' },
+    { number: 2, name: '김지한' },
+    { number: 3, name: '박서우' },
+    { number: 4, name: '유성원' },
+    { number: 5, name: '이건율' },
+    { number: 6, name: '이지호' },
+    { number: 7, name: '정민호' },
+    { number: 8, name: '조승현' },
+    { number: 9, name: '주승원' },
+    { number: 10, name: '최지율' },
+    { number: 41, name: '권하율' },
+    { number: 42, name: '김다윤' },
+    { number: 43, name: '김나윤' },
+    { number: 44, name: '송화윤' },
+    { number: 45, name: '왕재이' },
+    { number: 46, name: '윤은재' },
+    { number: 47, name: '이현서' },
+    { number: 48, name: '정단비' },
+    { number: 49, name: '정서진' },
+    { number: 50, name: '조은서' }
   ];
 
-  // 각 학생별로 다채롭고 생동감 있는 초기 데이터 부여
-  const initialStampPresets = [
-    { total: 32, coins: 17 }, // 1번 민준 (3단계)
-    { total: 15, coins: 15 }, // 2번 서아 (2단계)
-    { total: 8,  coins: 8 },  // 3번 도윤 (1단계, 진화 직전)
-    { total: 45, coins: 22 }, // 4번 지우 (3단계)
-    { total: 64, coins: 35 }, // 5번 하은 (4단계 황금나무!)
-    { total: 12, coins: 7 },  // 6번 예준 (2단계)
-    { total: 28, coins: 18 }, // 7번 은우 (2단계, 3단계 직전)
-    { total: 5,  coins: 5 },  // 8번 수아 (1단계)
-    { total: 19, coins: 14 }, // 9번 시우 (2단계)
-    { total: 35, coins: 20 }, // 10번 지아 (3단계)
-    { total: 9,  coins: 9 },  // 11번 우진 (1단계, 1개 더 모으면 2단계!)
-    { total: 58, coins: 28 }, // 12번 유나 (3단계, 황금나무 직전!)
-    { total: 14, coins: 9 },  // 13번 서진 (2단계)
-    { total: 3,  coins: 3 },  // 14번 채원 (1단계)
-    { total: 22, coins: 16 }, // 15번 민서 (2단계)
-    { total: 38, coins: 25 }, // 16번 태윤 (3단계)
-    { total: 61, coins: 40 }, // 17번 서연 (4단계 황금나무!)
-    { total: 7,  coins: 7 },  // 18번 준우 (1단계)
-    { total: 18, coins: 12 }, // 19번 다은 (2단계)
-    { total: 29, coins: 19 }  // 20번 서율 (2단계)
-  ];
-
-  return studentNames.map((name, index) => {
-    const num = index + 1;
-    const preset = initialStampPresets[index] || { total: 10, coins: 10 };
+  return studentList.map((st, index) => {
     const role = DEFAULT_ROLES[index % DEFAULT_ROLES.length];
-
     return {
-      id: `student-${num}`,
-      number: num,
-      name: name,
-      avatarSeed: num,
-      totalStamps: preset.total, // 누적 도장 수 (절대 감소하지 않음)
-      currentCoins: preset.coins, // 현재 보유 코인 (상점에서 사용 시 차감)
+      id: `student-${st.number}`,
+      number: st.number,
+      name: st.name,
+      avatarSeed: st.number,
+      totalStamps: 0, // 모든 스코어 0으로 초기 세팅
+      currentCoins: 0, // 모든 스코어 0으로 초기 세팅
       roleId: role.id,
-      coupons: [], // 보유 중인 승인된 쿠폰
-      pendingCouponRequests: [] // 교사 승인 대기 중인 신청 목록
+      coupons: [],
+      pendingCouponRequests: []
     };
   });
 }
@@ -192,28 +181,25 @@ class DataStore {
       students: generateDefaultStudents(),
       roles: JSON.parse(JSON.stringify(DEFAULT_ROLES)),
       coupons: JSON.parse(JSON.stringify(DEFAULT_COUPONS)),
-      approvalRequests: [
-        // 초기 체험용 승인 대기 1~2건
-        {
-          requestId: 'req-init-1',
-          studentId: 'student-1',
-          studentName: '김민준',
-          studentNumber: 1,
-          couponId: 'coupon-2',
-          couponTitle: '급식 1등으로 받기',
-          couponIcon: '🍱',
-          price: 10,
-          requestDate: new Date().toLocaleDateString('ko-KR')
-        }
-      ]
+      approvalRequests: []
     };
   }
 
   loadState() {
     try {
+      if (localStorage.getItem('SSOOK_CLASS_DATA_V1')) {
+        localStorage.removeItem('SSOOK_CLASS_DATA_V1');
+      }
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        // 구버전 학생 데이터(김민준 등)가 남아있거나 20명 명렬표가 다르면 새로 세팅
+        if (parsed.students && parsed.students[0] && (parsed.students[0].name === '김민준' || parsed.students[0].name !== '김이안')) {
+          const freshState = this.getDefaultState();
+          this.saveState(freshState);
+          return freshState;
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn('LocalStorage 로드 실패, 기본 데이터로 시작합니다.', e);
@@ -240,6 +226,14 @@ class DataStore {
   // 학생 단일 조회
   getStudent(studentId) {
     return this.state.students.find(s => s.id === studentId);
+  }
+
+  // 번호와 이름으로 학생 조회 (로그인 검증)
+  findStudentByNumberAndName(number, name) {
+    const num = Number(number);
+    const cleanName = (name || '').trim().replace(/\s+/g, '');
+    if (!num || !cleanName) return null;
+    return this.state.students.find(s => s.number === num && s.name.trim().replace(/\s+/g, '') === cleanName);
   }
 
   // 학생 도장 지급/차감 (단위: 100개 미만 제한 보장)

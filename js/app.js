@@ -6,7 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // ================= 1. 애플리케이션 상태 =================
   const state = {
-    currentView: 'studentPicker', // 'studentPicker' | 'studentDashboard' | 'shop' | 'teacherDashboard'
+    currentView: 'studentLogin', // 'studentLogin' | 'studentPicker' | 'studentDashboard' | 'shop' | 'teacherDashboard'
     selectedStudentId: null,
     teacherTab: 'tabStudents',
     pendingBuyCoupon: null,
@@ -30,10 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const teacherAlertBadge = document.getElementById('teacherAlertBadge');
 
   // 뷰 섹션들
+  const viewStudentLogin = document.getElementById('viewStudentLogin');
   const viewStudentPicker = document.getElementById('viewStudentPicker');
   const viewStudentDashboard = document.getElementById('viewStudentDashboard');
   const viewShop = document.getElementById('viewShop');
   const viewTeacherDashboard = document.getElementById('viewTeacherDashboard');
+
+  // 학생 로그인 화면 요소
+  const studentLoginForm = document.getElementById('studentLoginForm');
+  const loginStudentNumber = document.getElementById('loginStudentNumber');
+  const loginStudentName = document.getElementById('loginStudentName');
+  const loginAlertBox = document.getElementById('loginAlertBox');
+  const loginAlertText = document.getElementById('loginAlertText');
+  const studentLoginBtn = document.getElementById('studentLoginBtn');
+  const openRosterModalBtn = document.getElementById('openRosterModalBtn');
+  const viewAllCardsBtn = document.getElementById('viewAllCardsBtn');
+  const backToLoginFromPickerBtn = document.getElementById('backToLoginFromPickerBtn');
+
+  // 출석부 확인 모달
+  const rosterModal = document.getElementById('rosterModal');
+  const rosterQuickGrid = document.getElementById('rosterQuickGrid');
+  const closeRosterModalBtn = document.getElementById('closeRosterModalBtn');
 
   // 학생 선택 화면
   const totalStudentCount = document.getElementById('totalStudentCount');
@@ -158,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sound.playPop();
 
     // 모든 뷰 숨김
-    [viewStudentPicker, viewStudentDashboard, viewShop, viewTeacherDashboard].forEach(el => {
+    [viewStudentLogin, viewStudentPicker, viewStudentDashboard, viewShop, viewTeacherDashboard].forEach(el => {
       if (el) el.classList.add('hidden');
     });
 
@@ -179,7 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateApprovalBadge();
 
     // 대상 뷰 활성화
-    if (viewName === 'studentPicker') {
+    if (viewName === 'studentLogin') {
+      viewStudentLogin.classList.remove('hidden');
+      hideLoginAlert();
+    } else if (viewName === 'studentPicker') {
       viewStudentPicker.classList.remove('hidden');
       renderStudentPicker();
     } else if (viewName === 'studentDashboard') {
@@ -194,6 +214,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ================= 학생 로그인 처리 함수 =================
+  function handleStudentLogin() {
+    const numVal = (loginStudentNumber.value || '').trim();
+    const nameVal = (loginStudentName.value || '').trim();
+
+    if (!numVal || !nameVal) {
+      showLoginAlert('출석 번호와 이름을 모두 입력해 주세요! ✏️');
+      sound.playPop();
+      triggerLoginShake();
+      return;
+    }
+
+    const student = store.findStudentByNumberAndName(numVal, nameVal);
+
+    if (!student) {
+      showLoginAlert(`우리 반 명렬표에서 "${numVal}번 ${nameVal}" 학생을 찾을 수 없어요. 번호와 이름을 다시 확인해 볼까요? 🧐`);
+      sound.playPop();
+      triggerLoginShake();
+      return;
+    }
+
+    // 로그인 성공
+    hideLoginAlert();
+    state.selectedStudentId = student.id;
+    sound.playStampSound();
+    confetti.fire(1500);
+    showToast(`${student.number}번 ${student.name} 친구, 환영해요! 🌱`, 'success', '✨');
+    switchView('studentDashboard');
+  }
+
+  function showLoginAlert(msg) {
+    if (loginAlertBox && loginAlertText) {
+      loginAlertText.textContent = msg;
+      loginAlertBox.classList.remove('hidden');
+    }
+  }
+
+  function hideLoginAlert() {
+    if (loginAlertBox) {
+      loginAlertBox.classList.add('hidden');
+    }
+  }
+
+  function triggerLoginShake() {
+    const card = document.querySelector('.login-card');
+    if (card) {
+      card.classList.remove('shake');
+      void card.offsetWidth; // re-flow
+      card.classList.add('shake');
+      setTimeout(() => card.classList.remove('shake'), 600);
+    }
+  }
+
+  // 명렬표 빠른 선택 팝업 렌더링
+  function renderRosterQuickGrid() {
+    if (!rosterQuickGrid) return;
+    rosterQuickGrid.innerHTML = '';
+    const students = store.state.students;
+
+    students.forEach(st => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'roster-quick-btn';
+      btn.innerHTML = `
+        <span class="roster-num">${st.number}번</span>
+        <span class="roster-name">${st.name}</span>
+      `;
+      btn.addEventListener('click', () => {
+        sound.playPop();
+        loginStudentNumber.value = st.number;
+        loginStudentName.value = st.name;
+        hideLoginAlert();
+        rosterModal.classList.add('hidden');
+        showToast(`${st.number}번 ${st.name} 입력 완료! [우리 반 들어가기]를 눌러주세요.`, 'info', '🎒');
+        if (studentLoginBtn) studentLoginBtn.focus();
+      });
+      rosterQuickGrid.appendChild(btn);
+    });
   }
 
   // ================= 5. 토스트 알림 메시지 =================
@@ -251,7 +351,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       card.addEventListener('click', () => {
         state.selectedStudentId = student.id;
+        if (loginStudentNumber) loginStudentNumber.value = student.number;
+        if (loginStudentName) loginStudentName.value = student.name;
         sound.playPop();
+        showToast(`${student.number}번 ${student.name} 친구 로그인 완료! 🌱`, 'success', '🎒');
         switchView('studentDashboard');
       });
 
@@ -263,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderStudentDashboard() {
     const student = store.getStudent(state.selectedStudentId);
     if (!student) {
-      switchView('studentPicker');
+      switchView('studentLogin');
       return;
     }
 
@@ -871,9 +974,57 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ================= 8. 전역 내비게이션 & 이벤트 바인딩 =================
-  // 로고 클릭 -> 첫 화면으로
+  // 학생 로그인 폼 제출 & 버튼 클릭
+  if (studentLoginForm) {
+    studentLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleStudentLogin();
+    });
+  }
+
+  if (studentLoginBtn) {
+    studentLoginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleStudentLogin();
+    });
+  }
+
+  // 명렬표(출석부) 모달 열기/닫기
+  if (openRosterModalBtn) {
+    openRosterModalBtn.addEventListener('click', () => {
+      renderRosterQuickGrid();
+      if (rosterModal) rosterModal.classList.remove('hidden');
+      sound.playPop();
+    });
+  }
+
+  if (closeRosterModalBtn) {
+    closeRosterModalBtn.addEventListener('click', () => {
+      if (rosterModal) rosterModal.classList.add('hidden');
+    });
+  }
+
+  // 전체 친구들 카드 보기
+  if (viewAllCardsBtn) {
+    viewAllCardsBtn.addEventListener('click', () => {
+      switchView('studentPicker');
+    });
+  }
+
+  // 카드 보기에서 로그인으로 돌아가기
+  if (backToLoginFromPickerBtn) {
+    backToLoginFromPickerBtn.addEventListener('click', () => {
+      switchView('studentLogin');
+    });
+  }
+
+  // 로고 클릭 -> 상태에 맞게 이동
   logoBtn.addEventListener('click', () => {
-    switchView('studentPicker');
+    if (state.selectedStudentId && state.currentView !== 'teacherDashboard') {
+      switchView('studentDashboard');
+    } else {
+      switchView('studentLogin');
+    }
   });
 
   // 소리 토글 버튼
@@ -887,15 +1038,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // 모드 전환 버튼 (학생 <-> 선생님)
   modeSwitchBtn.addEventListener('click', () => {
     if (state.currentView === 'teacherDashboard') {
-      switchView('studentPicker');
+      if (state.selectedStudentId) {
+        switchView('studentDashboard');
+      } else {
+        switchView('studentLogin');
+      }
     } else {
       switchView('teacherDashboard');
     }
   });
 
-  // 학생 메인 -> 뒤로가기 (친구 선택 화면)
+  // 학생 대시보드 -> 학생 변경 (로그아웃)
   backToPickerBtn.addEventListener('click', () => {
-    switchView('studentPicker');
+    state.selectedStudentId = null;
+    sound.playPop();
+    showToast('로그아웃되었습니다. 다른 학생으로 로그인할 수 있어요.', 'info', '👋');
+    switchView('studentLogin');
   });
 
   // 학생 메인 -> 보물 상점 이동
@@ -910,7 +1068,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 선생님 대시보드 나가기
   exitTeacherBtn.addEventListener('click', () => {
-    switchView('studentPicker');
+    if (state.selectedStudentId) {
+      switchView('studentDashboard');
+    } else {
+      switchView('studentLogin');
+    }
   });
 
   // 선생님 대시보드 탭 전환
@@ -954,15 +1116,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // [데이터 초기화 버튼]
   resetDemoDataBtn.addEventListener('click', () => {
-    if (confirm('모든 학생의 도장과 쿠폰 데이터를 처음 샘플 상태로 되돌릴까요?')) {
+    if (confirm('모든 학생의 도장과 쿠폰 데이터를 처음 0점 상태로 되돌릴까요?')) {
       store.resetToDefault();
       sound.playStampSound();
-      showToast('체험용 데이터로 초기화되었습니다.', 'info', '🔄');
+      showToast('초기 데이터로 재설정되었습니다.', 'info', '🔄');
       renderTeacherDashboard();
     }
   });
 
   // ================= 9. 앱 시작 =================
   initHeader();
-  switchView('studentPicker');
+  switchView('studentLogin');
 });

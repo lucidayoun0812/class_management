@@ -151,6 +151,10 @@
           <span>🚪</span>
           <span>학생 변경 (로그아웃)</span>
         </button>
+        <button id="viewClassmatesFromDashBtn" class="classmates-nav-btn" title="친구들의 성장 나무와 도장 현황 보기">
+          <span>👀</span>
+          <span>친구들 현황 보기</span>
+        </button>
         <div class="student-profile-summary" id="dashProfileSummary">
           <!-- 번호, 이름 렌더링 -->
         </div>
@@ -537,6 +541,46 @@
       </div>
       <div class="modal-footer">
         <button id="closeRosterModalBtn" class="modal-btn btn-secondary">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 선생님 모드 비밀번호 확인 모달 -->
+  <div class="modal-backdrop hidden" id="teacherAuthModal">
+    <div class="modal-box teacher-auth-modal-box">
+      <div class="modal-header teacher-auth-header">
+        <span class="modal-icon-badge">🔐</span>
+        <div>
+          <h3>선생님 모드 비밀번호</h3>
+          <p class="teacher-auth-sub">선생님만 접속할 수 있는 관리자 화면입니다.</p>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form id="teacherAuthForm" class="teacher-auth-form" onsubmit="return false;">
+          <div class="auth-input-group">
+            <label for="teacherPasswordInput" class="auth-label">비밀번호를 입력하세요</label>
+            <div class="auth-password-wrapper">
+              <input 
+                type="password" 
+                id="teacherPasswordInput" 
+                class="auth-password-input" 
+                placeholder="비밀번호 입력" 
+                autocomplete="current-password"
+                required
+              >
+              <button type="button" id="toggleTeacherPwBtn" class="toggle-pw-btn" title="비밀번호 보기/가리기">
+                👁️
+              </button>
+            </div>
+          </div>
+          <div id="teacherAuthError" class="auth-error-msg hidden">
+            ⚠️ 비밀번호가 일치하지 않습니다. 다시 확인해 주세요!
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelTeacherAuthBtn" class="modal-btn btn-secondary">취소</button>
+        <button type="button" id="confirmTeacherAuthBtn" class="modal-btn btn-primary">확인</button>
       </div>
     </div>
   </div>

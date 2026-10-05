@@ -4,7 +4,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ================= 1. 애플리케이션 상태 =================
+  // ================= 1. 애플리케이션 상태 & 설정 =================
+  const TEACHER_PASSWORD = 'Beme0812!';
+
   const state = {
     currentView: 'studentLogin', // 'studentLogin' | 'studentPicker' | 'studentDashboard' | 'shop' | 'teacherDashboard'
     selectedStudentId: null,
@@ -52,12 +54,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const rosterQuickGrid = document.getElementById('rosterQuickGrid');
   const closeRosterModalBtn = document.getElementById('closeRosterModalBtn');
 
+  // 선생님 모드 비밀번호 모달
+  const teacherAuthModal = document.getElementById('teacherAuthModal');
+  const teacherAuthForm = document.getElementById('teacherAuthForm');
+  const teacherPasswordInput = document.getElementById('teacherPasswordInput');
+  const toggleTeacherPwBtn = document.getElementById('toggleTeacherPwBtn');
+  const teacherAuthError = document.getElementById('teacherAuthError');
+  const cancelTeacherAuthBtn = document.getElementById('cancelTeacherAuthBtn');
+  const confirmTeacherAuthBtn = document.getElementById('confirmTeacherAuthBtn');
+
   // 학생 선택 화면
   const totalStudentCount = document.getElementById('totalStudentCount');
   const studentsGrid = document.getElementById('studentsGrid');
 
   // 학생 대시보드
   const backToPickerBtn = document.getElementById('backToPickerBtn');
+  const viewClassmatesFromDashBtn = document.getElementById('viewClassmatesFromDashBtn');
   const dashProfileSummary = document.getElementById('dashProfileSummary');
   const openShopFromDashBtn = document.getElementById('openShopFromDashBtn');
   const dashStageBadge = document.getElementById('dashStageBadge');
@@ -296,6 +308,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ================= 선생님 모드 비밀번호 확인 로직 =================
+  function openTeacherAuthModal() {
+    if (teacherPasswordInput) {
+      teacherPasswordInput.value = '';
+      teacherPasswordInput.type = 'password';
+    }
+    if (toggleTeacherPwBtn) toggleTeacherPwBtn.textContent = '👁️';
+    if (teacherAuthError) teacherAuthError.classList.add('hidden');
+    if (teacherAuthModal) {
+      teacherAuthModal.classList.remove('hidden');
+      setTimeout(() => {
+        if (teacherPasswordInput) teacherPasswordInput.focus();
+      }, 100);
+    }
+  }
+
+  function closeTeacherAuthModal() {
+    if (teacherAuthModal) teacherAuthModal.classList.add('hidden');
+    if (teacherPasswordInput) teacherPasswordInput.value = '';
+    if (teacherAuthError) teacherAuthError.classList.add('hidden');
+  }
+
+  function handleTeacherAuth() {
+    const inputPw = (teacherPasswordInput.value || '').trim();
+
+    if (inputPw === TEACHER_PASSWORD) {
+      closeTeacherAuthModal();
+      sound.playStampSound();
+      showToast('선생님 모드로 접속되었습니다. 👩‍🏫', 'success', '🔐');
+      switchView('teacherDashboard');
+    } else {
+      sound.playBoing();
+      if (teacherAuthError) teacherAuthError.classList.remove('hidden');
+      const box = document.querySelector('.teacher-auth-modal-box');
+      if (box) {
+        box.classList.remove('shake');
+        void box.offsetWidth;
+        box.classList.add('shake');
+        setTimeout(() => box.classList.remove('shake'), 600);
+      }
+      if (teacherPasswordInput) {
+        teacherPasswordInput.value = '';
+        teacherPasswordInput.focus();
+      }
+    }
+  }
+
   // ================= 5. 토스트 알림 메시지 =================
   function showToast(message, type = 'info', icon = '💡') {
     const toast = document.createElement('div');
@@ -312,11 +371,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ================= 6. 화면별 렌더링 함수들 =================
 
-  // [1] 학생 선택 화면 렌더링
+  // [1] 학생 선택 / 친구들 모아보기 화면 렌더링
   function renderStudentPicker() {
     studentsGrid.innerHTML = '';
     const students = store.state.students;
     totalStudentCount.textContent = `${students.length}명`;
+
+    // 뒤로가기 버튼 안내 문구 동적 설정
+    if (backToLoginFromPickerBtn) {
+      if (state.selectedStudentId) {
+        backToLoginFromPickerBtn.innerHTML = '<span>👈</span> <span>내 화면으로 돌아가기</span>';
+      } else {
+        backToLoginFromPickerBtn.innerHTML = '<span>👈</span> <span>로그인으로 돌아가기</span>';
+      }
+    }
 
     students.forEach(student => {
       const stage = store.getGrowthStage(student.totalStamps);
@@ -350,12 +418,18 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       card.addEventListener('click', () => {
-        state.selectedStudentId = student.id;
-        if (loginStudentNumber) loginStudentNumber.value = student.number;
-        if (loginStudentName) loginStudentName.value = student.name;
         sound.playPop();
-        showToast(`${student.number}번 ${student.name} 친구 로그인 완료! 🌱`, 'success', '🎒');
-        switchView('studentDashboard');
+        if (state.selectedStudentId) {
+          // 이미 로그인한 학생이 친구 카드를 구경할 때 (임의 조작/대리 접속 방지)
+          showToast(`${student.number}번 ${student.name} 친구는 ${stage.level}단계 [${stage.name}]! (도장 ${student.totalStamps}개 / 코인 ${student.currentCoins}개)`, 'info', '🌱');
+        } else {
+          // 로그인 화면에서 들어왔을 때는 해당 학생으로 로그인
+          state.selectedStudentId = student.id;
+          if (loginStudentNumber) loginStudentNumber.value = student.number;
+          if (loginStudentName) loginStudentName.value = student.name;
+          showToast(`${student.number}번 ${student.name} 친구 로그인 완료! 🌱`, 'success', '🎒');
+          switchView('studentDashboard');
+        }
       });
 
       studentsGrid.appendChild(card);
@@ -580,7 +654,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filtered.forEach(student => {
       const stage = store.getGrowthStage(student.totalStamps);
-      const role = store.state.roles.find(r => r.id === student.roleId) || { icon: '⭐', title: '미정' };
+      const roleOptionsHtml = store.state.roles.map(r => `
+        <option value="${r.id}" ${student.roleId === r.id ? 'selected' : ''}>
+          ${r.icon} ${r.title}
+        </option>
+      `).join('');
 
       const card = document.createElement('div');
       card.className = 'teacher-student-card';
@@ -589,9 +667,17 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="tsc-num">${student.number}</div>
           <div class="tsc-info">
             <h4 class="tsc-name">${student.name}</h4>
-            <span class="tsc-stage">${stage.level}단계 ${stage.name} (${role.icon} ${role.title})</span>
+            <span class="tsc-stage">${stage.level}단계 ${stage.name}</span>
           </div>
           <div class="tsc-avatar">${stage.icon}</div>
+        </div>
+
+        <!-- 1인 1역 바로 변경 드롭다운 -->
+        <div class="tsc-role-bar">
+          <label class="tsc-role-label">⭐ 1인 1역:</label>
+          <select class="tsc-role-select" data-student-id="${student.id}" title="1인 1역 바로 변경">
+            ${roleOptionsHtml}
+          </select>
         </div>
 
         <div class="tsc-balances">
@@ -617,6 +703,18 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </div>
       `;
+
+      // 1인 1역 바로 변경 이벤트
+      const roleSelect = card.querySelector('.tsc-role-select');
+      if (roleSelect) {
+        roleSelect.addEventListener('change', (e) => {
+          const newRoleId = e.target.value;
+          store.assignRole(student.id, newRoleId);
+          sound.playPop();
+          const targetRole = store.state.roles.find(r => r.id === newRoleId);
+          showToast(`${student.name} 학생의 1인 1역을 [${targetRole ? targetRole.title : ''}]으로 변경했습니다!`, 'success', '🧹');
+        });
+      }
 
       // 버튼 이벤트
       const prevLevel = stage.level;
@@ -1011,10 +1109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 카드 보기에서 로그인으로 돌아가기
+  // 카드 보기에서 돌아가기 (로그인 상태면 대시보드로, 아니면 로그인 화면으로)
   if (backToLoginFromPickerBtn) {
     backToLoginFromPickerBtn.addEventListener('click', () => {
-      switchView('studentLogin');
+      if (state.selectedStudentId) {
+        switchView('studentDashboard');
+      } else {
+        switchView('studentLogin');
+      }
     });
   }
 
@@ -1035,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(sound.isMuted ? '효과음이 꺼졌습니다.' : '효과음이 켜졌습니다. 🎵', 'info');
   });
 
-  // 모드 전환 버튼 (학생 <-> 선생님)
+  // 모드 전환 버튼 (학생 <-> 선생님) : 선생님 모드 진입 시 비밀번호 확인 필수!
   modeSwitchBtn.addEventListener('click', () => {
     if (state.currentView === 'teacherDashboard') {
       if (state.selectedStudentId) {
@@ -1044,9 +1146,47 @@ document.addEventListener('DOMContentLoaded', () => {
         switchView('studentLogin');
       }
     } else {
-      switchView('teacherDashboard');
+      openTeacherAuthModal();
     }
   });
+
+  // 선생님 비밀번호 모달 이벤트 바인딩
+  if (cancelTeacherAuthBtn) {
+    cancelTeacherAuthBtn.addEventListener('click', closeTeacherAuthModal);
+  }
+
+  if (confirmTeacherAuthBtn) {
+    confirmTeacherAuthBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleTeacherAuth();
+    });
+  }
+
+  if (teacherAuthForm) {
+    teacherAuthForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleTeacherAuth();
+    });
+  }
+
+  if (toggleTeacherPwBtn) {
+    toggleTeacherPwBtn.addEventListener('click', () => {
+      if (teacherPasswordInput.type === 'password') {
+        teacherPasswordInput.type = 'text';
+        toggleTeacherPwBtn.textContent = '🙈';
+      } else {
+        teacherPasswordInput.type = 'password';
+        toggleTeacherPwBtn.textContent = '👁️';
+      }
+    });
+  }
+
+  // 학생 대시보드 -> 친구들 현황 구경하기
+  if (viewClassmatesFromDashBtn) {
+    viewClassmatesFromDashBtn.addEventListener('click', () => {
+      switchView('studentPicker');
+    });
+  }
 
   // 학생 대시보드 -> 학생 변경 (로그아웃)
   backToPickerBtn.addEventListener('click', () => {

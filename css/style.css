@@ -789,6 +789,83 @@ body {
   border: 1px dashed #90caf9;
 }
 
+/* ================== 다인수 역할 번호 및 세부 역할 뱃지 스타일 ================== */
+.role-multi-num-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Gaegu', 'Jua', cursive, sans-serif;
+  font-weight: 700;
+  font-size: 1.15em;
+  line-height: 1;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: linear-gradient(135deg, #ff8a65 0%, #ff5722 100%);
+  color: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(255, 87, 34, 0.35);
+  margin: 0 3px;
+  transform: rotate(-3deg);
+  vertical-align: middle;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.role-multi-num-pill:hover {
+  transform: rotate(0deg) scale(1.1);
+}
+
+.role-sub-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-base);
+  font-size: 0.82em;
+  font-weight: 600;
+  color: #1565c0;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.role-base-title {
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+/* 대시보드 메인 1인 1역 제목 내 배지 크기 조정 */
+.role-title .role-multi-num-pill {
+  min-width: 32px;
+  height: 32px;
+  font-size: 1.35rem;
+  margin-left: 6px;
+}
+
+.role-title .role-sub-pill {
+  font-size: 0.95rem;
+  padding: 3px 10px;
+  margin-left: 8px;
+}
+
+/* 학생 카드 내부 1인 1역 태그 내 배지 크기 조정 */
+.student-role-tag .role-multi-num-pill {
+  min-width: 19px;
+  height: 19px;
+  font-size: 0.95rem;
+  padding: 0 4px;
+  margin-left: 2px;
+}
+
+.student-role-tag .role-sub-pill {
+  font-size: 0.72rem;
+  padding: 1px 5px;
+  margin-left: 3px;
+}
+
 /* 내가 가진 보물 쿠폰 카드 */
 .my-coupons-card {
   flex-grow: 1;

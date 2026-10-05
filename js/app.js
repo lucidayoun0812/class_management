@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="student-role-tag" title="${role.title}">
           <span>${role.icon}</span>
-          <span>${role.title}</span>
+          <span>${window.formatRoleTitleHtml(role)}</span>
         </div>
       `;
 
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 오늘 나의 1인 1역
     dashRoleIcon.textContent = role.icon;
-    dashRoleTitle.textContent = role.title;
+    dashRoleTitle.innerHTML = window.formatRoleTitleHtml(role);
     dashRoleDesc.textContent = role.desc;
 
     // 보유 쿠폰 목록 렌더링
@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const stage = store.getGrowthStage(student.totalStamps);
       const roleOptionsHtml = store.state.roles.map(r => `
         <option value="${r.id}" ${student.roleId === r.id ? 'selected' : ''}>
-          ${r.icon} ${r.title}
+          ${window.formatRoleOptionLabel ? window.formatRoleOptionLabel(r) : `${r.icon} ${r.title}`}
         </option>
       `).join('');
 
@@ -712,7 +712,8 @@ document.addEventListener('DOMContentLoaded', () => {
           store.assignRole(student.id, newRoleId);
           sound.playPop();
           const targetRole = store.state.roles.find(r => r.id === newRoleId);
-          showToast(`${student.name} 학생의 1인 1역을 [${targetRole ? targetRole.title : ''}]으로 변경했습니다!`, 'success', '🧹');
+          const roleDisplayName = targetRole ? (window.formatRoleOptionLabel ? window.formatRoleOptionLabel(targetRole) : targetRole.title) : '';
+          showToast(`${student.name} 학생의 1인 1역을 [${roleDisplayName}]으로 변경했습니다!`, 'success', '🧹');
         });
       }
 
@@ -778,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const optionsHtml = store.state.roles.map(r => `
         <option value="${r.id}" ${student.roleId === r.id ? 'selected' : ''}>
-          ${r.icon} ${r.title}
+          ${window.formatRoleOptionLabel ? window.formatRoleOptionLabel(r) : `${r.icon} ${r.title}`}
         </option>
       `).join('');
 
@@ -795,7 +796,9 @@ document.addEventListener('DOMContentLoaded', () => {
       row.querySelector('.rar-select').addEventListener('change', (e) => {
         store.assignRole(student.id, e.target.value);
         sound.playPop();
-        showToast(`${student.name} 학생의 1인 1역을 변경했습니다.`, 'success', '🧹');
+        const targetRole = store.state.roles.find(r => r.id === e.target.value);
+        const roleDisplayName = targetRole ? (window.formatRoleOptionLabel ? window.formatRoleOptionLabel(targetRole) : targetRole.title) : '';
+        showToast(`${student.name} 학생의 1인 1역을 [${roleDisplayName}]으로 변경했습니다.`, 'success', '🧹');
       });
 
       rolesStudentList.appendChild(row);
@@ -808,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
       li.innerHTML = `
         <span class="role-preset-icon">${role.icon}</span>
         <div>
-          <strong class="role-preset-title">${role.title}</strong>
+          <strong class="role-preset-title">${window.formatRoleTitleHtml ? window.formatRoleTitleHtml(role) : role.title}</strong>
           <p class="role-preset-desc">${role.desc}</p>
         </div>
       `;

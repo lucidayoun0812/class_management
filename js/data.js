@@ -3,7 +3,7 @@
  * 기본 데이터 정의 및 로컬 스토리지 관리 모듈
  */
 
-const STORAGE_KEY = 'SSOOK_CLASS_DATA_V2';
+const STORAGE_KEY = 'SSOOK_CLASS_DATA_V3';
 
 // 1. 성장 단계 기준 정의 (단일 성장 시스템: 누적 칭찬 도장 개수 기반)
 const GROWTH_STAGES = [
@@ -53,21 +53,75 @@ const GROWTH_STAGES = [
   }
 ];
 
-// 2. 초등 2학년 맞춤형 1인 1역 사전 정의
+// 2. 20명 맞춤형 1인 1역 사전 정의 (총 20개 역할)
+// 칠판이 2명, 환기도우미 1명, 우유배달 2명, 독서기록장 나눔이 4명(독서기록장, 세줄쓰기, 일기장, 동시-받아쓰기),
+// 날짜도우미 1명, 급식요정 1명, 촉촉이 1명, 전원맨 1명, 가통맨 1명, 미덕이 6명
 const DEFAULT_ROLES = [
-  { id: 'role-1', icon: '🧹', title: '칠판 지우개 요정', desc: '쉬는 시간마다 칠판을 깨끗이 닦아 교실을 환하게 만들어요!' },
-  { id: 'role-2', icon: '🚶', title: '줄 서기 반장', desc: '급식실이나 강당에 갈 때 앞장서서 바르게 줄을 서요!' },
-  { id: 'role-3', icon: '🥛', title: '시원한 우유 도우미', desc: '친구들에게 신선한 우유를 사이좋게 하나씩 나눠줘요!' },
-  { id: 'role-4', icon: '📚', title: '학급 문고 정리왕', desc: '책장 속 동화책들을 가지런히 순서대로 정리해요!' },
-  { id: 'role-5', icon: '💡', title: '전등 불 끄기 지킴이', desc: '교실 밖으로 나갈 때 전등과 선풍기 스위치를 확인해요!' },
-  { id: 'role-6', icon: '🪴', title: '초록 화분 돌보미', desc: '우리 반 예쁜 화분에 사랑의 분무기를 칙칙 뿌려줘요!' },
-  { id: 'role-7', icon: '🪟', title: '맑은 공기 환기 대장', desc: '아침과 점심시간에 창문을 열어 상쾌한 공기를 채워요!' },
-  { id: 'role-8', icon: '✏️', title: '연필깎이 깔끔 대장', desc: '연필깎이 통을 확인하고 흑연 가루를 깔끔하게 비워요!' },
-  { id: 'role-9', icon: '🗑️', title: '분리수거 보안관', desc: '종이와 플라스틱 쓰레기가 바르게 버려지도록 도와요!' },
-  { id: 'role-10', icon: '🔔', title: '수업 시간 알리미', desc: '종이 울리면 "친구들아, 자리에 앉자!" 씩씩하게 외쳐요!' },
-  { id: 'role-11', icon: '🧼', title: '뽀득 손 씻기 도우미', desc: '식사 전 친구들이 비누로 손을 잘 씻도록 친절히 안내해요!' },
-  { id: 'role-12', icon: '🌈', title: '다정한 칭찬 요정', desc: '친구들의 착하고 따뜻한 행동을 찾아 선생님께 알려줘요!' }
+  // 칠판이 2명
+  { id: 'role-blackboard-1', category: '칠판이', num: 1, subText: '', icon: '🧹', title: '칠판이 1', desc: '쉬는 시간마다 칠판을 깨끗하게 닦아 교실을 환하게 만들어요!' },
+  { id: 'role-blackboard-2', category: '칠판이', num: 2, subText: '', icon: '🧹', title: '칠판이 2', desc: '쉬는 시간마다 칠판을 깨끗하게 닦아 교실을 환하게 만들어요!' },
+
+  // 환기도우미 1명
+  { id: 'role-ventilation', category: '환기도우미', num: null, subText: '', icon: '🪟', title: '환기도우미', desc: '아침과 점심시간에 창문을 활짝 열어 상쾌한 공기를 채워요!' },
+
+  // 우유배달 2명
+  { id: 'role-milk-1', category: '우유배달', num: 1, subText: '', icon: '🥛', title: '우유배달 1', desc: '친구들에게 시원하고 신선한 우유를 사이좋게 하나씩 나눠줘요!' },
+  { id: 'role-milk-2', category: '우유배달', num: 2, subText: '', icon: '🥛', title: '우유배달 2', desc: '친구들에게 시원하고 신선한 우유를 사이좋게 하나씩 나눠줘요!' },
+
+  // 독서기록장 나눔이 4명 (독서기록장, 세줄쓰기, 일기장, 동시-받아쓰기)
+  { id: 'role-reading-1', category: '독서기록장 나눔이', num: 1, subText: '독서기록장', icon: '📖', title: '독서기록장 나눔이 1 (독서기록장)', desc: '친구들의 소중한 독서기록장을 걷고 예쁘게 나누어줘요!' },
+  { id: 'role-reading-2', category: '독서기록장 나눔이', num: 2, subText: '세줄쓰기', icon: '✍️', title: '독서기록장 나눔이 2 (세줄쓰기)', desc: '매일매일 생각 쑥쑥! 세줄쓰기 공책을 바르게 정리하고 나눠줘요!' },
+  { id: 'role-reading-3', category: '독서기록장 나눔이', num: 3, subText: '일기장', icon: '📔', title: '독서기록장 나눔이 3 (일기장)', desc: '친구들의 두근두근 일기장을 가지런히 모아서 선생님께 전달해요!' },
+  { id: 'role-reading-4', category: '독서기록장 나눔이', num: 4, subText: '동시·받아쓰기', icon: '📝', title: '독서기록장 나눔이 4 (동시·받아쓰기)', desc: '동시와 받아쓰기 학습장을 친구들에게 순서대로 나누어줘요!' },
+
+  // 날짜도우미 1명
+  { id: 'role-calendar', category: '날짜도우미', num: null, subText: '', icon: '📅', title: '날짜도우미', desc: '매일 아침 교실 달력과 칠판 날짜를 확인하고 친구들에게 알려줘요!' },
+
+  // 급식요정 1명
+  { id: 'role-lunch', category: '급식요정', num: null, subText: '', icon: '🍱', title: '급식요정', desc: '맛있는 급식 시간! 식사 질서를 지키고 잔반 줄이기를 도와요!' },
+
+  // 촉촉이 1명
+  { id: 'role-moist', category: '촉촉이', num: null, subText: '', icon: '🪴💦', title: '촉촉이', desc: '우리 반 초록 화분에 사랑의 분무기를 칙칙 뿌려 촉촉하게 가꿔요!' },
+
+  // 전원맨 1명
+  { id: 'role-power', category: '전원맨', num: null, subText: '', icon: '💡🔌', title: '전원맨', desc: '교실 밖으로 나갈 때 전등과 선풍기 스위치, 전자칠판 전원을 지켜요!' },
+
+  // 가통맨 1명
+  { id: 'role-notice', category: '가통맨', num: null, subText: '', icon: '📬📄', title: '가통맨', desc: '중요한 가정통신문과 알림장 종이를 빠짐없이 친구들에게 전달해요!' },
+
+  // 미덕이 6명
+  { id: 'role-virtue-1', category: '미덕이', num: 1, subText: '', icon: '💖', title: '미덕이 1', desc: '친구들의 착하고 따뜻한 미덕 행동을 찾아 다정하게 칭찬해요!' },
+  { id: 'role-virtue-2', category: '미덕이', num: 2, subText: '', icon: '🌟', title: '미덕이 2', desc: '친구들에게 고운 말과 배려를 실천하며 교실을 훈훈하게 만들어요!' },
+  { id: 'role-virtue-3', category: '미덕이', num: 3, subText: '', icon: '🤝', title: '미덕이 3', desc: '도움이 필요한 친구를 먼저 발견하고 사이좋게 손을 내밀어요!' },
+  { id: 'role-virtue-4', category: '미덕이', num: 4, subText: '', icon: '🌈', title: '미덕이 4', desc: '우리 반에 웃음과 긍정 에너지를 가득 채우는 행복 비타민 역할!' },
+  { id: 'role-virtue-5', category: '미덕이', num: 5, subText: '', icon: '🎁', title: '미덕이 5', desc: '친구들의 좋은 점을 비밀 칭찬 쪽지에 적어 마음을 전해요!' },
+  { id: 'role-virtue-6', category: '미덕이', num: 6, subText: '', icon: '🍀', title: '미덕이 6', desc: '다투지 않고 화목하게 지낼 수 있도록 다정한 평화 지킴이!' }
 ];
+
+// 역할 표시용 HTML 포맷터 (다인수 역할 번호는 귀엽고 예쁜 다른 폰트 배지로 포맷팅)
+function formatRoleTitleHtml(role) {
+  if (!role) return '';
+  if (role.num) {
+    const sub = role.subText ? ` <span class="role-sub-pill">${role.subText}</span>` : '';
+    return `<span class="role-base-title">${role.category || role.title}</span> <span class="role-multi-num-pill">${role.num}</span>${sub}`;
+  }
+  return `<span class="role-base-title">${role.title}</span>`;
+}
+
+// 드롭다운 및 텍스트 전용 레이블 포맷터 (동그라미 숫자 기호 사용)
+function formatRoleOptionLabel(role) {
+  if (!role) return '';
+  const circleNums = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+  if (role.num) {
+    const numChar = circleNums[role.num] || String(role.num);
+    const sub = role.subText ? ` (${role.subText})` : '';
+    return `${role.icon} ${role.category || role.title} ${numChar}${sub}`;
+  }
+  return `${role.icon} ${role.title}`;
+}
+
+window.formatRoleTitleHtml = formatRoleTitleHtml;
+window.formatRoleOptionLabel = formatRoleOptionLabel;
 
 // 3. 초등 2학년 특권 보물 쿠폰 사전 정의
 const DEFAULT_COUPONS = [
@@ -129,7 +183,7 @@ const DEFAULT_COUPONS = [
   }
 ];
 
-// 4. 20명 학생 초기 데이터 생성 (새 명렬표 반영 & 점수 0 초기화)
+// 4. 20명 학생 초기 데이터 생성 (새 명렬표 반영 & 20개 역할 1:1 매칭 & 점수 0 초기화)
 function generateDefaultStudents() {
   const studentList = [
     { number: 1, name: '김이안' },
@@ -155,7 +209,8 @@ function generateDefaultStudents() {
   ];
 
   return studentList.map((st, index) => {
-    const role = DEFAULT_ROLES[index % DEFAULT_ROLES.length];
+    // 20개 역할과 20명 학생을 1:1로 매칭
+    const role = DEFAULT_ROLES[index] || DEFAULT_ROLES[0];
     return {
       id: `student-${st.number}`,
       number: st.number,
@@ -190,11 +245,16 @@ class DataStore {
       if (localStorage.getItem('SSOOK_CLASS_DATA_V1')) {
         localStorage.removeItem('SSOOK_CLASS_DATA_V1');
       }
+      if (localStorage.getItem('SSOOK_CLASS_DATA_V2')) {
+        localStorage.removeItem('SSOOK_CLASS_DATA_V2');
+      }
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        // 구버전 학생 데이터(김민준 등)가 남아있거나 20명 명렬표가 다르면 새로 세팅
-        if (parsed.students && parsed.students[0] && (parsed.students[0].name === '김민준' || parsed.students[0].name !== '김이안')) {
+        // 구버전 학생 데이터이거나 20개 역할이 일치하지 않는 경우 새 역할 구성으로 강제 초기화
+        const isOldRoles = !parsed.roles || parsed.roles.length !== 20 || parsed.roles[0].id !== 'role-blackboard-1';
+        const isOldStudents = !parsed.students || !parsed.students[0] || parsed.students[0].name !== '김이안';
+        if (isOldRoles || isOldStudents) {
           const freshState = this.getDefaultState();
           this.saveState(freshState);
           return freshState;
